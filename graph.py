@@ -1,22 +1,25 @@
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+import argparse
 
-def main(perf1_path, perf2_path):
-    # Read the CSV files
-    perf1 = pd.read_csv(perf1_path, header=None)
-    perf2 = pd.read_csv(perf2_path, header=None)
-
-    # Sort the arrays
-    perf1_sorted = sorted(perf1[0])
-    perf2_sorted = sorted(perf2[0])
+def main(parfpaths):
+    
+    # Get the length of the shortest csv so we can graph
+    #incomplete data
+    shortest = 99999999
+    for path in parfpaths:
+        perfdata = pd.read_csv(path, header=None)
+        if len(perfdata[0] < shortest):
+            shortest = len(perfdata[0])
 
     # Create x values (positions in the array)
-    x_values = list(range(len(perf1_sorted)))
-
-    # Plot the data
-    plt.plot(x_values, perf1_sorted, label='perf1', marker='o', markersize=2)
-    plt.plot(x_values, perf2_sorted, label='perf2', marker='o', markersize=2)
+    x_values = list(range(shortest))
+        
+    for path in parfpaths:
+        perfdata = pd.read_csv(path, header=None)
+        perf_sorted = sorted(perfdata[0][0:shortest])
+        plt.plot(x_values, perf_sorted, label=path, marker='o', markersize=2)
 
     # Add labels and title
     plt.xlabel('Position in array')
@@ -27,12 +30,10 @@ def main(perf1_path, perf2_path):
     # Show the plot
     plt.show()
 
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python script.py <perf1.csv> <perf2.csv>")
-        sys.exit(1)
-
-    perf1_path = sys.argv[1]
-    perf2_path = sys.argv[2]
-
-    main(perf1_path, perf2_path)
+    parser = argparse.ArgumentParser(description='Graph data from CSV files.')
+    parser.add_argument('file_paths', metavar='F', type=str, nargs='+', help='CSV file paths')
+    args = parser.parse_args()
+    main(args.file_paths)
